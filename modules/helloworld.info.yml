@@ -1,0 +1,7 @@
+name: Hello World
+description: 'Сustom Form!'
+type: module
+core: 8.x
+version: 1.0
+package: Examples
+
