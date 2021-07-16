@@ -32,11 +32,7 @@ class SimpleForm extends FormBase {
 
     $config = \Drupal::config('helloworld.simple_form.settings');
 
-//    $form['phone_number'] = array(
-//      '#type' => 'tel',
-//      '#title' => $this->t('Your phone number'),
-//      '#default_value' => $config->get('phone_number')
-//    );
+
 
     $form['name'] = array(
       '#type' => 'textfield',
@@ -104,22 +100,7 @@ class SimpleForm extends FormBase {
 
 
 
-//  function my_form_mail($key, &$message, $params) {
-//
-//    $headers = array(
-//      'MIME-Version' => '1.0',
-//      'Content-Type' => 'text/html; charset=UTF-8;',
-//      'Content-Transfer-Encoding' => '8Bit',
-//      'X-Mailer' => 'Drupal'
-//    );
-//
-//    foreach ($headers as $key => $value) {
-//      $message['headers'][$key] = $value;
-//    }
-//
-//    $message['subject'] = $params['subject'];
-//    $message['body'] = $params['body'];
-//  }
+
 
 
   /**
