@@ -2,7 +2,6 @@ simple_form.form:
   path: '/first-page'
   defaults:
     _title: 'Сustom form with fields (use Drupal API).'
-
     _form: '\Drupal\helloworld\Form\SimpleForm'
   requirements:
     _permission: 'access content'

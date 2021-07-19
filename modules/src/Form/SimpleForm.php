@@ -16,6 +16,7 @@ use Drupal\Core\Form\FormStateInterface;
 
 class SimpleForm extends FormBase {
 
+  public $properties = [];
   /**
    *
    * {@inheritdoc}.
@@ -32,44 +33,51 @@ class SimpleForm extends FormBase {
 
     $config = \Drupal::config('helloworld.simple_form.settings');
 
-
-
-    $form['name'] = array(
+    $form['first_name'] = array(
       '#type' => 'textfield',
-      '#title' => $this->t('Your name')
+      '#title' => $this->t('Your name'),
+      '#required' => TRUE
     );
 
 
     $form['last_name'] = array(
       '#type' => 'textfield',
-      '#title' => $this->t('Your Last name')
+      '#title' => $this->t('Your Last name'),
+      '#required' => TRUE
     );
 
-    $form['Subject'] = array(
+    $form['subject'] = array(
       '#type' => 'textfield',
-      '#title' => $this->t('Your Subject')
+      '#title' => $this->t('Your Subject'),
+      '#required' => TRUE
     );
 
-    $form['messages'] = array(
+    $form['message'] = array(
       '#type' => 'textfield',
-      '#size' => 'long',
-      '#title' => $this->t('Your message')
+      '#title' => $this->t('Your message'),
+      '#required' => TRUE
     );
 
-    $form['email_'] = array(
+    $form['email'] = array(
       '#type' => 'textfield',
       '#title' => '',
+      '#required' => TRUE,
       '#size' => '20',
       '#attributes' =>array('placeholder' => t('E-mail address'))
     );
 
-
-    $form['actions']['#type'] = 'actions';
-    $form['actions']['submit'] = array(
+    $form['button'] = array(
       '#type' => 'submit',
-      '#value' => $this->t('Send data'),
-      '#button_type' => 'primary',
+      '#value' => 'Submit'
     );
+
+
+//    $form['actions']['#type'] = 'actions';
+//    $form['actions']['submit'] = array(
+//      '#type' => 'submit',
+//      '#value' => $this->t('Send data'),
+//      '#button_type' => 'primary',
+//    );
     return $form;
   }
 
@@ -79,25 +87,29 @@ class SimpleForm extends FormBase {
    * @throws \Exception
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-//    if (strlen($form_state->getValue('name')) < 5) {
-//      $form_state->setErrorByName('name', $this->t('Name is too short.'));
+
+//    if (preg_match("/^(?:[a-z0-9]+(?:[-_.]?[a-z0-9]+)?@[a-z0-9_.-]+(?:\.?[a-z0-9]+)?\.[a-z]{2,5})$/i", $form_state->getValue('email_')))
+//    {
+//      drupal_set_message($this->t('Thank you @name, your Email is @email', array(
+//        '@name' => $form_state->getValue('name'),
+//        '@email' => $form_state->getValue('email_')
+//
+//      )));
+//
 //    }
-    if (preg_match("/^(?:[a-z0-9]+(?:[-_.]?[a-z0-9]+)?@[a-z0-9_.-]+(?:\.?[a-z0-9]+)?\.[a-z]{2,5})$/i", $form_state->getValue('email_')))
-    {
-      drupal_set_message($this->t('Thank you @name, your Email is @email', array(
-        '@name' => $form_state->getValue('name'),
-        '@email' => $form_state->getValue('email_')
+//    else
+//    {
+//
+//      $form_state->setErrorByName('email_', $this->t('Your Email is incorrect'));
+//    }
+//  }
+    if (strpos($form_state->getValue('email'), '.com') === FALSE) {
 
-      )));
+      $form_state->setErrorByName('email', 'E-mail is incorrect!');
 
     }
-    else
-    {
 
-      $form_state->setErrorByName('email_', $this->t('Your Email is incorrect'));
-    }
   }
-
 
 
 
@@ -109,24 +121,52 @@ class SimpleForm extends FormBase {
    * @throws \Exception
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-//    $dk = db_insert('exampleform') -> fields(array(
-//      'name' => $form_state['values'] ['fname'],
-//      'last_name' => $form_state['values'] ['lname'],
-//      'Subject' => $form_state['values']['subjectbd'],
-//      'messages' => $form_state['values']['messagesbd'],
-//      'phone_number' => $form_state['values']['phone_number'],
-//      'email_' => $form_state['values']['	email'],
-//
-//    ))
-//      -> execute();
-//    dsm($dk);
 
-//    drupal_set_message($this->t('Thank you @name, your Email is @email', array(
-//      '@name' => $form_state->getValue('name'),
-//      '@email' => $form_state->getValue('email_')
-//    )));
+    $message = $form_state->getValue('message');
 
+    $message = wordwrap($message, 70, "\r\n");
 
-  }
+    $subject = $form_state->getValue('subject');
+
+    $res = mail('info@mydrupal.com', $subject, $message);
+
+    if($res) {
+
+      \Drupal::logger('simple_form')->notice('Mail is sent. E-mail: '.$form_state->getValue('email'));
+
+      drupal_set_message('E-mail is sent!');
+
+    }
+
+    $email = $form_state->getValue('email');
+    $firstname = $form_state->getValue('first_name');
+    $lastname = $form_state->getValue('last_name');
+
+    $url = "https://api.hubapi.com/contacts/v1/contact/createOrUpdate/email/".$email."/?hapikey=8bc7dc9c-40de-4079-8b04-8bf5081671c6";
+
+    $data = array(
+      'properties' => [
+        [
+          'property' => 'firstname',
+          'value' => $firstname
+        ],
+        [
+          'property' => 'lastname',
+          'value' => $lastname
+        ]
+      ]
+    );
+
+    $json = json_encode($data,true);
+
+//    $request = \Drupal::httpClient()->post($url, NULL, $json);
+
+    $response = \Drupal::httpClient()->post($url.'&_format=hal_json', [
+      'headers' => [
+        'Content-Type' => 'application/json'
+      ],
+      'body' => $json
+    ]);
+    }
 
 }

@@ -1,0 +1,8 @@
+hubspot.settings:
+  type: mapping
+  label: Settings
+  mapping:
+    hubspot_debug_on:
+      type: integer
+    tracking_code_on:
+      type: integer
